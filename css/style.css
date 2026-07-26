@@ -289,6 +289,10 @@ ul {
     box-shadow: var(--shadow-md);
 }
 
+.main-header.scrolled .logo-img {
+    height: 70px;
+}
+
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -299,14 +303,15 @@ ul {
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
 }
 
 .logo-img {
-    height: 60px;
+    height: 90px;
     width: auto;
     object-fit: contain;
     border-radius: 50%;
+    transition: var(--transition-smooth);
 }
 
 .logo-text {
@@ -316,14 +321,14 @@ ul {
 
 .logo-name {
     font-family: 'Outfit', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
     color: var(--primary-green);
     line-height: 1.1;
 }
 
 .logo-tagline {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: var(--primary-gold-dark);
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -1550,7 +1555,22 @@ textarea.form-control {
     color: var(--primary-gold);
 }
 
+@media (max-width: 768px) {
+    .logo-img {
+        height: 70px;
+    }
+    .logo-name {
+        font-size: 1.4rem;
+    }
+}
+
 @media (max-width: 576px) {
+    .logo-img {
+        height: 60px;
+    }
+    .logo-name {
+        font-size: 1.2rem;
+    }
     .footer-bottom .container {
         flex-direction: column;
         text-align: center;
