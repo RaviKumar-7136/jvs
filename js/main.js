@@ -84,7 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const openEnquiryModal = (productName = '') => {
         if (modalBackdrop) {
             if (productInterestInput && productName) {
-                productInterestInput.value = productName;
+                let matchedOption = Array.from(productInterestInput.options).find(opt => 
+                    opt.value.toLowerCase().includes(productName.toLowerCase()) || 
+                    productName.toLowerCase().includes(opt.value.toLowerCase())
+                );
+                if (matchedOption) {
+                    productInterestInput.value = matchedOption.value;
+                } else {
+                    productInterestInput.value = productName;
+                }
             }
             modalBackdrop.classList.add('active');
             document.body.style.overflow = 'hidden'; // Lock background scrolling
@@ -120,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Close modal on Escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalBackdrop && modalBackdrop.classList.contains('active')) {
+            closeEnquiryModal();
+        }
+    });
 
 
     // ==========================================
@@ -166,18 +181,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 6. Interactive Contact Forms
     // ==========================================
-    // Main Contact Form on contact.html
+    // Main Contact Form on contact.html & index.html
     const contactForm = document.querySelector('#jvsContactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.textContent : 'Submit';
+
             // Collect fields
-            const name = document.querySelector('#name').value.trim();
-            const email = document.querySelector('#email').value.trim();
-            const phone = document.querySelector('#phone').value.trim();
-            const interest = document.querySelector('#interest').value;
-            const message = document.querySelector('#message').value.trim();
+            const nameEl = contactForm.querySelector('#name');
+            const emailEl = contactForm.querySelector('#email');
+            const phoneEl = contactForm.querySelector('#phone');
+            const interestEl = contactForm.querySelector('#interest');
+            const messageEl = contactForm.querySelector('#message');
+
+            const name = nameEl ? nameEl.value.trim() : '';
+            const email = emailEl ? emailEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const interest = interestEl ? interestEl.value : '';
+            const message = messageEl ? messageEl.value.trim() : '';
             
             // Simple validation
             if (!name || !email || !phone || !message) {
@@ -192,16 +216,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Simple phone validation (10 digits)
-            const phonePattern = /^[0-9]{10}$/;
-            if (!phonePattern.test(phone.replace(/[\s\-()]/g, ''))) {
+            // Phone validation (10 digits, supporting +91 and spaces/dashes)
+            const cleanedPhone = phone.replace(/[\s\-()]/g, '').replace(/^\+91/, '').replace(/^\+/, '');
+            if (!/^\d{10}$/.test(cleanedPhone)) {
                 showToast('Please enter a valid 10-digit mobile number.', 'error');
                 return;
             }
 
-            // Mock submission success (since it's a static site)
-            showToast('Thank you! Your message has been sent successfully. We will contact you soon.');
-            contactForm.reset();
+            // Button feedback
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+            }
+
+            setTimeout(() => {
+                showToast('Thank you! Your message has been sent successfully. We will contact you soon.');
+                contactForm.reset();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            }, 600);
         });
     }
 
@@ -211,14 +246,23 @@ document.addEventListener('DOMContentLoaded', () => {
         modalForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const name = document.querySelector('#modalName').value.trim();
-            const email = document.querySelector('#modalEmail').value.trim();
-            const phone = document.querySelector('#modalPhone').value.trim();
-            const product = document.querySelector('#productInterest').value;
-            const message = document.querySelector('#modalMessage').value.trim();
+            const submitBtn = modalForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn ? submitBtn.textContent : 'Submit Enquiry';
+
+            const nameEl = modalForm.querySelector('#modalName');
+            const emailEl = modalForm.querySelector('#modalEmail');
+            const phoneEl = modalForm.querySelector('#modalPhone');
+            const productEl = modalForm.querySelector('#productInterest');
+            const messageEl = modalForm.querySelector('#modalMessage');
+
+            const name = nameEl ? nameEl.value.trim() : '';
+            const email = emailEl ? emailEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const product = productEl ? productEl.value : 'Product Inquiry';
+            const message = messageEl ? messageEl.value.trim() : '';
 
             if (!name || !email || !phone) {
-                showToast('Please fill in Name, Email, and Phone number.', 'error');
+                showToast('Please fill in Name, Email, and Mobile number.', 'error');
                 return;
             }
 
@@ -228,10 +272,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Submit logic
-            closeEnquiryModal();
-            showToast(`Inquiry for ${product} submitted successfully! Our representative will call you.`);
-            modalForm.reset();
+            const cleanedPhone = phone.replace(/[\s\-()]/g, '').replace(/^\+91/, '').replace(/^\+/, '');
+            if (!/^\d{10}$/.test(cleanedPhone)) {
+                showToast('Please enter a valid 10-digit mobile number.', 'error');
+                return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            setTimeout(() => {
+                closeEnquiryModal();
+                showToast(`Inquiry for "${product}" submitted successfully! Our representative will contact you.`);
+                modalForm.reset();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            }, 600);
         });
     }
 });
